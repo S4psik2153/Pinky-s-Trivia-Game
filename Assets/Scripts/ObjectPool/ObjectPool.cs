@@ -38,8 +38,9 @@ public class ObjectPool<T> where T : Component
     /// </param>
     /// <param name="initalPoolSize">
     /// Prewarm için başlangıçta oluşturulacak obje sayısı.
+    /// Varsayılan değeri: <c>0</c>.
     /// </param>
-    public ObjectPool(T prefab, Transform parent, int initalPoolSize)
+    public ObjectPool(T prefab, Transform parent, int initalPoolSize = 0)
     {
         this.prefab = prefab;
         this.parent = parent;

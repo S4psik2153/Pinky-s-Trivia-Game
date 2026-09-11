@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad4dbc4453cf84c6d9c30bb5013c979f, type: 3}
+  m_Name: TimerDecayPerk
+  m_EditorClassIdentifier: Assembly-CSharp::TimerBoost_Perk
+  perkDescription: Sayac suresi {0} saniye azalir.
+  perkPriority: 4
+  tokenValue: -7
+  effectWhiteList: []
+  effectBlackList:
+  - {fileID: 11400000, guid: f1477e9b1bc1c46c5859be814453f5e1, type: 2}
+  minMultiplierLimit: -1
+  maxMultiplierLimit: 4
+  timerBonusAmount: -0.5

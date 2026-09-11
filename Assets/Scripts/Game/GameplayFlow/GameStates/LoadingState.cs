@@ -48,8 +48,17 @@ public class LoadingState : GameState
 
         context.SetQuestions(list);
 
-        if (LoadingScreenManager.Instance != null) LoadingScreenManager.Instance.HideLoadingScreen();
+        if (LoadingScreenManager.Instance != null)  LoadingScreenManager.Instance.HideLoadingScreen(OnLoadingScreenHide);
+        else                                        context.ChangeGameState(new IntroductionState(context));
+    }
 
-        context.ChangeGameState(new QuestionState(context));
+    /// <summary>
+    /// Yükleme ekranı hala açıksa
+    /// kapanma animasyonunun ardından
+    /// ilk soruyu başlatan metot.
+    /// </summary>
+    private void OnLoadingScreenHide()
+    {
+        context.ChangeGameState(new IntroductionState(context));
     }
 }

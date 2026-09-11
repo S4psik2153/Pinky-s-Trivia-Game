@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad4dbc4453cf84c6d9c30bb5013c979f, type: 3}
+  m_Name: TimerBoostPerk 1
+  m_EditorClassIdentifier: Assembly-CSharp::TimerBoost_Perk
+  perkDescription: Sayac suresi {0} saniye artar.
+  perkPriority: 2
+  tokenValue: 7
+  effectWhiteList:
+  - {fileID: 11400000, guid: 1ae8bc8ad746442c99437a17e1865e92, type: 2}
+  effectBlackList:
+  - {fileID: 11400000, guid: c47ee5024430c402b83ef1129608d48a, type: 2}
+  minMultiplierLimit: -1
+  maxMultiplierLimit: 5
+  timerBonusAmount: 2

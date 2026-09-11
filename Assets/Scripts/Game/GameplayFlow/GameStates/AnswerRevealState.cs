@@ -40,8 +40,11 @@ public class AnswerRevealState : GameState
     {
         // Arayüz güncellenir.
         context.UI.ShowAnswerResult(selectedIndex, correctAnswerIndex);
-        context.UI.UpdateScore(context.Score);
+        context.UI.UpdateScore(context.Score, context.ScoreMultiplier);
         context.UI.SetNextQuestionButtonActive(true);
+
+        if (selectedIndex == correctAnswerIndex) context.UI.PlayMascotCorrect();
+        else                                     context.UI.PlayMascotWrong();
 
         context.UI.NextQuestionRequested += NextQuestionRequested;
     }
@@ -59,11 +62,19 @@ public class AnswerRevealState : GameState
 
     /// <summary>
     /// Sonraki soru butonuna basıldığında uyarılan metottur.
-    /// Bağlam içerisindeki <see cref="GameplayManager.MoveToNextQuestion"/> metodunu çağırarak
-    /// sonraki soruya veya daha fazla soru yoksa oyun sonu oyun durumuna geçmeyi sağlar.
+    /// Bağlama göre <see cref="PerkSelectionState"/> oyun durumuna veya
+    /// <see cref="GameplayManager.MoveToNextQuestion"/> metodunu çağırarak
+    /// sonraki soruya geçmeyi sağlar.
     /// </summary>
     private void NextQuestionRequested()
     {
-        context.MoveToNextQuestion();
+        if (context.HasMoreQuestions)
+        {
+            context.ChangeGameState(new PerkSelectionState(context));
+        }
+        else
+        {
+            context.MoveToNextQuestion();
+        }
     }
 }

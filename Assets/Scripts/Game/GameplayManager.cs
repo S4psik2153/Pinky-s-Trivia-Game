@@ -7,6 +7,13 @@ using UnityEngine;
 /// </summary>
 public class GameplayManager : MonoBehaviour
 {
+    private PerkManager perkManager;
+    public PerkManager Perks => perkManager;
+    [SerializeField] private PerkEffectPool perkEffectPool;
+    public PerkEffectPool EffectPool => perkEffectPool;
+
+    [SerializeField] private PerkPool perkPool;
+
     [Header("References")]
     [Tooltip("Oyun sonunda ana menüye dönmeyi sağlayan sahne bilgilerini tutan veri. Inspectordan ayarlanmalıdır.")]
     [SerializeField] private SceneLoader sceneLoader;
@@ -24,6 +31,9 @@ public class GameplayManager : MonoBehaviour
     /// Oyun durumlarının yapılandırma verilerine erişmesi gereken durumlarda kullanılan alan.
     /// </summary>
     public GameConfiguration Config => gameConfiguration;
+
+    [SerializeField] private PerkConfiguration perkConfig;
+    public PerkConfiguration PerkConfig => perkConfig;
 
     [SerializeField] private LocalLeaderBoardStorage storage;
     /// <summary>
@@ -59,11 +69,18 @@ public class GameplayManager : MonoBehaviour
             return questions[currentQuestionIndex];
         }
     }
+    public int TotalQuestionCount => questions?.Count ?? 0;
 
     /// <summary>
     /// Oyunun hangi soruda olduğunu index olarak tutan veri.
     /// </summary>
     private int currentQuestionIndex;
+    /// <summary>
+    /// Kaçıncı soruda olduğumuz bilgisini
+    /// <see cref="currentQuestionIndex"/>
+    /// değeri üzerinden ileten alan.
+    /// </summary>
+    public int CurrentQuestionNumber => currentQuestionIndex + 1;
 
     /// <summary>
     /// Oyuncunun anlık skorunu tutan veri.
@@ -109,6 +126,12 @@ public class GameplayManager : MonoBehaviour
         elapsedTime += Mathf.Clamp(amount, 0f, Config.questionDuration);
     }
 
+    private float timerSpeed = 1f;
+    public float TimerSpeed { get => timerSpeed; set => timerSpeed = value; }
+
+    private float scoreMultiplier = 1f;
+    public float ScoreMultiplier { get => scoreMultiplier; set => scoreMultiplier = value; }
+
     /// <summary>
     /// <see cref="currentQuestionIndex"/> değerine göre
     /// <see cref="questions"/> listesinde daha fazla soru olup olmadığını
@@ -123,8 +146,39 @@ public class GameplayManager : MonoBehaviour
     /// </remarks>
     public bool HasMoreQuestions => currentQuestionIndex < questions.Count - 1;
 
+    public int MarkedChoiceIndex { get; set; } = -1;
+    public float MarkedChoiceMultiplier { get; set; } = 1f;
+
+    public float PerkMultiplier { get; set; } = 1f;
+
+    public float TemporaryPerkMultiplier { get; set; } = 1f;
+
+    public event Action ChoiceEliminationRequested;
+    public void RequestChoiceElimination() => ChoiceEliminationRequested?.Invoke();
+
+    private readonly List<int> frostHitCount = new();
+
+    public List<int> FrozenChoices(int frostHit = 0)
+    {   
+        if (frostHitCount.Count > UI.ChoiceCount) return frostHitCount;
+        
+        if (frostHit > 0) frostHitCount.Add(frostHit);
+
+        return frostHitCount;
+    }
+
+    private List<Question> questionPool;
+    private int poolIndex;
+
+    public int ExtraChoiceCount { get; set; }
+    public int RemovedChoiceCount { get; set; }
+
     void Start()
     {
+        ResetGameProgress();
+
+        perkManager = new PerkManager(this, perkPool);
+
         // Oyun başladığı anda ilk durum olan LoadingState() oyun durumu başlatılır.
         ChangeGameState(new LoadingState(this));
     }
@@ -133,6 +187,12 @@ public class GameplayManager : MonoBehaviour
     {
         // Durumların tik kısımları (varsa) uygulanır.
         currentGameState?.Tick();
+    }
+
+    private void ResetGameProgress()
+    {
+        score = 0;
+        elapsedTime = 0;
     }
 
     /// <summary>
@@ -218,6 +278,9 @@ public class GameplayManager : MonoBehaviour
             return;
         }
 
+        this.questionPool = questionPool;
+        poolIndex = Mathf.Min(Config.questionCount, questionPool.Count);
+
         currentQuestionIndex = 0;
 
         List<Question> questionsForAsk = new();
@@ -229,9 +292,6 @@ public class GameplayManager : MonoBehaviour
         }
 
         questions = questionsForAsk;
-
-        score = 0;
-        elapsedTime = 0;
     }
 
     /// <summary>
@@ -242,5 +302,41 @@ public class GameplayManager : MonoBehaviour
         if (LoadingScreenManager.Instance != null) LoadingScreenManager.Instance.HideErrorScreen();
 
         sceneLoader.LoadTargetScene();
+    }
+
+    public bool AddQuestion()
+    {
+        if (questionPool == null || poolIndex >= questionPool.Count) return false;
+
+        questions.Add(questionPool[poolIndex]);
+        poolIndex++;
+        return true;
+    }
+
+    public bool RemoveQuestion()
+    {
+        if (questions == null) return false;
+
+        if (questions.Count <= currentQuestionIndex + 1) return false;
+
+        questions.RemoveAt(questions.Count - 1);
+        return true;
+    }
+
+    public string GetRandomWrongChoiceFromPool()
+    {
+        if (questionPool == null || questionPool.Count < 2) return null;
+
+        Question current = CurrentQuestion;
+
+        int rng = UnityEngine.Random.Range(0, questionPool.Count);
+        if (questionPool[rng] == current) rng = (rng + 1) % questionPool.Count;
+
+        Question source = questionPool[rng];
+
+        if (source == null || source.choices == null || source.choices.Length < 2) return null;
+
+        int choiceIndex = UnityEngine.Random.Range(1, source.choices.Length);
+        return source.choices[choiceIndex];
     }
 }

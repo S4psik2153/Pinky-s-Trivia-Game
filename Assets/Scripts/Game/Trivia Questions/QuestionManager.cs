@@ -1,20 +1,26 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Networking;
 
 /// <summary>
 /// Soru verilerini yönetmek için oluşturulmuş sınıf.
-/// URL üzerinden elde edilen <see cref="QuestionList"/> verisi
+/// URL üzerinden elde edilen <see cref="Question_WebList"/> verisi
 /// formatlanarak <see cref="Question"/> listesine ekleniyor.
 /// </summary>
 public class QuestionManager : MonoBehaviour
 {
     /// <summary>
-    /// <see cref="QuestionList"/> verisinin internet üzerinden alınabilmesini sağlayan URL.
+    /// <see cref="Question_WebList"/> verisinin internet üzerinden alınabilmesini sağlayan URL.
     /// </summary>
     [SerializeField] private string question_URL = "https://magegamessite.web.app/case1/questions.json";
+
+    /// <summary>
+    /// <see cref="Question_LocalWrapper"/> verisinin yerel dosyalar üzerinden alınabilmesini sağlayan veri.
+    /// </summary>
+    [SerializeField] private TextAsset localQuestions_File;
 
     /// <summary>
     /// Soru verilerinin URL aracılığı ile
@@ -39,16 +45,21 @@ public class QuestionManager : MonoBehaviour
     /// yüklenmekteyse callback sağlanır.
     /// </summary>
     /// <param name="onQuestionsLoaded">
-    /// <see cref="QuestionList"/> verisi elde edildiğinde
+    /// <see cref="Question_WebList"/> verisi elde edildiğinde
     /// callback sağlayan Action.
     /// </param>
     public void Start_LoadingQuestions(Action<List<Question>> onQuestionsLoaded)
     {
         if (!IsLoading)
         {
+            List<Question> questions = new();
+
+            // Lokal soru verileri dosyadan yükleniyor.
+            questions.AddRange(GetLocalQuestions());
+
             // Veriler daha önce indirilmemiş. İndirme başlatılıyor...
             IsLoading = true;
-            StartCoroutine(GetRequestForQuestions(onQuestionsLoaded));
+            StartCoroutine(GetRequestForQuestions(onQuestionsLoaded, questions));
         }
         else
         {
@@ -73,7 +84,12 @@ public class QuestionManager : MonoBehaviour
     /// Yükleme işlemi tamamlandığında çağırılacak
     /// callback'i tutan Action.
     /// </param>
-    IEnumerator GetRequestForQuestions(Action<List<Question>> onQuestionsLoaded)
+    /// <param name="questions">
+    /// Yerel soru verilerinin web soru verileri ile
+    /// birleştirildiği liste verisi.
+    /// Coroutine sonunda callback'e iletilir.
+    /// </param>
+    IEnumerator GetRequestForQuestions(Action<List<Question>> onQuestionsLoaded, List<Question> questions)
     {
         string url = question_URL;
 
@@ -105,16 +121,18 @@ public class QuestionManager : MonoBehaviour
         {
             Debug.LogError("Error: " + webRequest.error + ", Response Code: " + webRequest.responseCode + ", Result: " + webRequest.result);
 
-            onQuestionsLoaded?.Invoke(null);
-
             IsLoading = false;
+
+            ShuffleQuestionList(questions);
+
+            if (LoadingScreenManager.Instance != null) yield return LoadingScreenManager.Instance.SetLoadingProgress(1f)?.WaitForCompletion();  
+
+            onQuestionsLoaded?.Invoke(questions.Count > 0 ? questions : null);
             
             yield break;
         }
 
         // URL isteği başarılı, JSON verisi elde edildi.
-        Debug.Log("Received: " + webRequest.downloadHandler.text);
-
         string json = webRequest.downloadHandler.text;
 
         // JSON parçalayıcısı ham satır sonu terimleri ('\n' veya '\r' gibi) ile karşılaştığında çalışmaz.
@@ -123,24 +141,26 @@ public class QuestionManager : MonoBehaviour
         json = json.Replace("\r", "");
 
         // Elde edilen veri o formata uygun olarak hazırlanmış sınıfa JSON parçalama işlemi ile aktarılır.
-        QuestionList questionList = JsonUtility.FromJson<QuestionList>(json);
+        Question_WebList questionList = JsonUtility.FromJson<Question_WebList>(json);
 
         // Elde edilen veri kontrol edilir, parçalama sırasında bir sorun meydana geldiyse konsola hata mesajı yazılır.
         if (questionList == null || questionList.questions == null)
         {
             Debug.LogError("Failed to parse JSON for Questions");
-            
-            onQuestionsLoaded?.Invoke(null);
 
             IsLoading = false;
+
+            ShuffleQuestionList(questions);
+
+            if (LoadingScreenManager.Instance != null) yield return LoadingScreenManager.Instance.SetLoadingProgress(1f)?.WaitForCompletion();  
+
+            onQuestionsLoaded?.Invoke(questions.Count > 0 ? questions : null);
             
             yield break;
         }
 
-        List<Question> questions = new();
-
         // Geçerliliği doğrulanmış soru veriler soru listesine aktarılır.
-        foreach (Question_ListWeb webQuestion in questionList.questions)
+        foreach (Question_Web webQuestion in questionList.questions)
         {
             // Boş soru içeren sorular atlanır.
             if (webQuestion == null || webQuestion.choices == null)
@@ -176,8 +196,61 @@ public class QuestionManager : MonoBehaviour
         // Elde edilen liste karıştırılır.
         ShuffleQuestionList(questions);
 
+        if (LoadingScreenManager.Instance != null) yield return LoadingScreenManager.Instance.SetLoadingProgress(1f)?.WaitForCompletion();   
+
+        // Listede toplanan soruların sayısı kontrol edilir.
         // Soruların gösterimi için ilgili metot uyarılır.
-        onQuestionsLoaded?.Invoke(questions);
+        // Liste boşsa null liste iletilir.
+        onQuestionsLoaded?.Invoke(questions.Count > 0 ? questions : null);
+    }
+
+    /// <summary>
+    /// Yerel soru dosyasından soruları yükleyen metot.
+    /// </summary>
+    /// <returns>
+    /// Yerel soru dosyasından yüklenen veriler
+    /// <see cref="Question"/> listesi formatında döndürülür.
+    /// Dosyada veya içeriğinde bir sorun varsa boş liste döndürülür.
+    /// </returns>
+    private List<Question> GetLocalQuestions()
+    {
+        List<Question> questionList = new();
+
+        if (localQuestions_File == null)
+        {
+            Debug.LogError("Local question file can not found.");
+
+            return questionList;
+        }
+
+        string json = localQuestions_File.text;
+
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            Debug.LogError("Local question file empty or white space.");
+
+            return questionList;
+        }
+
+        Question_LocalWrapper localQuestions = JsonUtility.FromJson<Question_LocalWrapper>(json);
+
+        if (localQuestions == null || localQuestions.questions == null)
+        {
+            Debug.LogError("Question list is empty.");
+
+            return questionList;
+        }
+
+        foreach (Question question in localQuestions.questions)
+        {
+            if (question == null) continue;
+
+            if (question.choices == null || question.choices.Length <= 0) question.error = true;
+
+            questionList.Add(question);
+        }
+
+        return questionList;
     }
 
     /// <summary>

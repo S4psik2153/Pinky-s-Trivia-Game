@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,8 +22,8 @@ public class LoadingScreenManager : MonoBehaviour
     public static LoadingScreenManager Instance { get; private set; }
 
     [Header("Screen Canvas Groups")]
-    [SerializeField] private CanvasGroup loadingScreen_CanvasGroup;
-    [SerializeField] private CanvasGroup errorScreen_CanvasGroup;
+    [SerializeField] private AnimatedPanel animatedLoadingScreenPanel;
+    [SerializeField] private AnimatedPanel animatedErrorScreenPanel;
 
     [Header("Loading Screen Elements")]
     [SerializeField] private Slider loading_Slider;
@@ -40,6 +41,16 @@ public class LoadingScreenManager : MonoBehaviour
     [SerializeField] private float questionLoadProgressWeight = 0.5f;
     public float QuestionLoadProgressWeight => questionLoadProgressWeight;
 
+    private Tweener progressTween;
+    [SerializeField] private float progressTweenDuration = 0.25f;
+    [SerializeField] private Ease progressEase = Ease.Linear;
+
+    [SerializeField] private int stepCount = 8;
+    [SerializeField] private float stepInterval = 0.1f;
+    [SerializeField] private Transform target;
+    private float timer;
+    private int currentStep;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -53,6 +64,21 @@ public class LoadingScreenManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    void Update()
+    {
+        timer += Time.deltaTime;
+        if (timer < stepInterval) return;
+
+        timer = 0f;
+        currentStep = (currentStep + 1) % stepCount;
+        target.localRotation = Quaternion.Euler(0f, 0f, -currentStep * (360f / stepCount));
+    }
+
+    void OnDestroy()
+    {
+        progressTween?.Kill();
+    }
+
     /// <summary>
     /// Yükleme ekranının gösterilmesi için
     /// kullanılan public API metot.
@@ -63,11 +89,17 @@ public class LoadingScreenManager : MonoBehaviour
     /// raycastlerin ekrandan geçişini
     /// aktifleştirir.
     /// </remarks>
-    public void ShowLoadingScreen()
+    /// <param name="onComplete">
+    /// Animasyon tamamlandığında çağırılacak
+    /// callback Action.
+    /// Varsayılan olarak <c>null</c>.
+    /// </param>
+    public Tween ShowLoadingScreen(Action onComplete = null)
     {
-        loadingScreen_CanvasGroup.alpha = 1f;
-        loadingScreen_CanvasGroup.interactable = true;
-        loadingScreen_CanvasGroup.blocksRaycasts = true;
+        progressTween?.Kill();
+        loading_Slider.value = 0f;
+
+        return animatedLoadingScreenPanel.ShowPanel(onComplete);
     }
 
     /// <summary>
@@ -80,11 +112,18 @@ public class LoadingScreenManager : MonoBehaviour
     /// raycastlerin ekrandan geçişini
     /// deaktifleştirir.
     /// </remarks>
-    public void HideLoadingScreen()
+    /// <param name="onComplete">
+    /// Animasyon tamamlandığında çağırılacak
+    /// callback Action.
+    /// Varsayılan olarak <c>null</c>.
+    /// </param>
+    /// <returns>
+    /// Animasyon bilgisi <see cref="Tween"/>
+    /// verisi olarak döndürülür.
+    /// </returns>
+    public Tween HideLoadingScreen(Action onComplete = null)
     {
-        loadingScreen_CanvasGroup.alpha = 0f;
-        loadingScreen_CanvasGroup.interactable = false;
-        loadingScreen_CanvasGroup.blocksRaycasts = false;
+        return animatedLoadingScreenPanel.HidePanel(onComplete);
     }
 
     /// <summary>
@@ -96,9 +135,20 @@ public class LoadingScreenManager : MonoBehaviour
     /// Sadece <c>0</c> - <c>1</c> arasındaki
     /// değerlerle işlem yapılabilir.
     /// </remarks>
-    public void SetLoadingProgress(float progress)
+    /// <returns>
+    /// Animasyon bilgisi yükleme barının dolmasının beklenebilmesi için
+    /// <see cref="Tweener"/> verisi olarak döndürülür.
+    /// </returns>
+    public Tweener SetLoadingProgress(float progress)
     {
-        loading_Slider.value = progress;
+        if (progressTween != null && progressTween.IsActive())
+        {
+            return progressTween.ChangeEndValue(progress, true);
+        }
+        else
+        {
+            return progressTween = loading_Slider.DOValue(progress, progressTweenDuration).SetEase(progressEase);
+        }
     }
 
     /// <summary>
@@ -118,7 +168,16 @@ public class LoadingScreenManager : MonoBehaviour
     /// Butona basılınca çağırılacak
     /// callback Action.
     /// </param>
-    public void ShowErrorScreen(string errorMessage, Action onDismiss)
+    /// <param name="onComplete">
+    /// Animasyon tamamlandığında çağırılacak
+    /// callback Action.
+    /// Varsayılan olarak <c>null</c>.
+    /// </param>
+    /// <returns>
+    /// Animasyon bilgisi <see cref="Tween"/>
+    /// verisi olarak döndürülür.
+    /// </returns>
+    public Tween ShowErrorScreen(string errorMessage, Action onDismiss, Action onComplete = null)
     {
         // Eğer açık bir yükleme ekranı varsa önce onu kapat.
         HideLoadingScreen();
@@ -129,9 +188,7 @@ public class LoadingScreenManager : MonoBehaviour
         loadingFailure_Button.onClick.RemoveAllListeners();
         loadingFailure_Button.onClick.AddListener(() => onDismiss?.Invoke());
 
-        errorScreen_CanvasGroup.alpha = 1f;
-        errorScreen_CanvasGroup.interactable = true;
-        errorScreen_CanvasGroup.blocksRaycasts = true;
+        return animatedErrorScreenPanel.ShowPanel(onComplete);
     }
 
     /// <summary>
@@ -144,12 +201,19 @@ public class LoadingScreenManager : MonoBehaviour
     /// raycastlerin ekrandan geçişini
     /// deaktifleştirir.
     /// </remarks>
-    public void HideErrorScreen()
+    /// <param name="onComplete">
+    /// Animasyon tamamlandığında çağırılacak
+    /// callback Action.
+    /// Varsayılan olarak <c>null</c>.
+    /// </param>
+    /// <returns>
+    /// Animasyon bilgisi <see cref="Tween"/>
+    /// verisi olarak döndürülür.
+    /// </returns>
+    public Tween HideErrorScreen(Action onComplete = null)
     {
         loadingFailure_Button.onClick.RemoveAllListeners();
 
-        errorScreen_CanvasGroup.alpha = 0f;
-        errorScreen_CanvasGroup.interactable = false;
-        errorScreen_CanvasGroup.blocksRaycasts = false;
+        return animatedErrorScreenPanel.HidePanel(onComplete);
     }
 }

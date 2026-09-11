@@ -16,3 +16,6 @@ MonoBehaviour:
   wrongScore: -5
   timeoutScore: -3
   questionDuration: 20
+  recklessTime: 5
+  questionCount: 10
+  baseChoiceCount: 4

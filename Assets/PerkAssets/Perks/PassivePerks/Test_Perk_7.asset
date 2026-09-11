@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a327cb7ae4a74214b7cfbb25b7292af, type: 3}
+  m_Name: Test_Perk_7
+  m_EditorClassIdentifier: Assembly-CSharp::Perk
+  perkName: ROR
+  perkIcon: {fileID: 0}
+  perkMiniIcon: {fileID: 0}
+  perkType: 0
+  effects:
+  - effect: {fileID: 11400000, guid: f1477e9b1bc1c46c5859be814453f5e1, type: 2}
+    multiplier: 1
+  - effect: {fileID: 11400000, guid: 7a59f97fdc87b4d238cd0b7a00b71f45, type: 2}
+    multiplier: 2
+  effectLimit: 5

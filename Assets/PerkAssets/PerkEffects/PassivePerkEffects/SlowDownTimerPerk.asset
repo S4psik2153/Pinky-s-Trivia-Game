@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcffd864c281448119e12cb9507decf2, type: 3}
+  m_Name: SlowDownTimerPerk
+  m_EditorClassIdentifier: Assembly-CSharp::TimerSpeed_Perk
+  perkDescription: Sayac {0}% yavaslar.
+  perkPriority: 0
+  tokenValue: 12
+  effectWhiteList: []
+  effectBlackList:
+  - {fileID: 11400000, guid: 9a01e54c9297b444ba247fd9beb41455, type: 2}
+  minMultiplierLimit: -1
+  maxMultiplierLimit: 4
+  timerSpeedRate: -0.2

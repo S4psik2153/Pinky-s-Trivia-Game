@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b78820918343a45b989b49cd31916de6, type: 3}
+  m_Name: Silgi_PerkData
+  m_EditorClassIdentifier: Assembly-CSharp::PerkData
+  perkName: Silgi
+  perkIcon: {fileID: 7115779882598989900, guid: bd142598d718d4233915ef3884862f70, type: 3}
+  miniPerkIcon: {fileID: -8648652535709045789, guid: 0856e151b19a340eca166877bf03c90f, type: 3}

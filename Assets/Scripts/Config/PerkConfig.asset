@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aece568582cd1452e8c746a6e98c217f, type: 3}
+  m_Name: PerkConfig
+  m_EditorClassIdentifier: Assembly-CSharp::PerkConfiguration
+  perkDataList:
+  - {fileID: 11400000, guid: 707ee309abc80424da4cf407d952d155, type: 2}
+  - {fileID: 11400000, guid: 3fc83021539be4bdf85ac2e9dcfc9207, type: 2}
+  effectLimit: 5
+  tokenTolerance: 2
+  minMultiplier: 1
+  maxMultiplier: 10
+  maxPositiveToken: 32
+  maxNegativeToken: -32
+  flexibility: 2
+  tokenMultiplierRatio: 5
+  whiteListChance: 0.5
+  activePerkTypeChance: 0.3
+  positivePerkChance: 0.2
+  negativePerkChance: 0.13
+  perkPositiveProfileIcon: {fileID: 8088625814657357077, guid: 63240d8ac861545a9b06549826cd5977, type: 3}
+  perkNegativeProfileIcon: {fileID: 2668489110966246254, guid: 99688b7be35c74eae9d8dc168a8f1aaf, type: 3}
+  perkNeutralProfileIcon: {fileID: -761923698401716660, guid: 26cdb9d2ad6894411b743443e26f69bb, type: 3}

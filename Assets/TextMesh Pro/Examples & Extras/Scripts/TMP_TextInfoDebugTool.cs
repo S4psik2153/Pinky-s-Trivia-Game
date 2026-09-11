@@ -42,7 +42,7 @@ namespace TMPro.Examples
                     return;
             }
 
-            m_Transform = m_TextComponent.transform;
+            m_Transform = m_TextComponent.Transform;
 
             // Get a reference to the text object's textInfo
             m_TextInfo = m_TextComponent.textInfo;
@@ -554,8 +554,8 @@ namespace TMPro.Examples
             Bounds meshBounds = m_TextComponent.bounds;
 
             // Get Bottom Left and Top Right position of each word
-            Vector3 bottomLeft = m_TextComponent.transform.position + meshBounds.min;
-            Vector3 topRight = m_TextComponent.transform.position + meshBounds.max;
+            Vector3 bottomLeft = m_TextComponent.Transform.position + meshBounds.min;
+            Vector3 topRight = m_TextComponent.Transform.position + meshBounds.max;
 
             DrawRectangle(bottomLeft, topRight, new Color(1, 0.5f, 0));
         }
@@ -565,8 +565,8 @@ namespace TMPro.Examples
         {
             Bounds textBounds = m_TextComponent.textBounds;
 
-            Vector3 bottomLeft = m_TextComponent.transform.position + (textBounds.center - textBounds.extents);
-            Vector3 topRight = m_TextComponent.transform.position + (textBounds.center + textBounds.extents);
+            Vector3 bottomLeft = m_TextComponent.Transform.position + (textBounds.center - textBounds.extents);
+            Vector3 topRight = m_TextComponent.Transform.position + (textBounds.center + textBounds.extents);
 
             DrawRectangle(bottomLeft, topRight, new Color(0f, 0.5f, 0.5f));
         }

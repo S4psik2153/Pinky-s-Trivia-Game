@@ -29,7 +29,7 @@ public class LeaderBoardDisplay : MonoBehaviour
     private ObjectPool<LeaderBoardRow> rowPool;
 
     [Header("Leader Board UI Elements")]
-    [SerializeField] private CanvasGroup        leaderBoard_CanvasGroup;
+    [SerializeField] private AnimatedPanel      animatedLeaderBoardPanel;
 
     [Header("Leader Board Panel Buttons")]
     [SerializeField] private Button             closeLeaderBoard_Button;
@@ -45,6 +45,7 @@ public class LeaderBoardDisplay : MonoBehaviour
     [Header("Leader Board Rows")]
     [SerializeField] private RectTransform      leaderBoard_DisplayRowParent;
     [SerializeField] private LeaderBoardRow     displayRow_Prefab;
+    [SerializeField] private float rowStaggerDelay = 0.04f;
 
     [Header("Local Leader Board UI Elements")]
     [SerializeField] private Button             deleteLocalLeaderBoard_Button;
@@ -111,9 +112,7 @@ public class LeaderBoardDisplay : MonoBehaviour
     {
         currentPage = 0;
 
-        leaderBoard_CanvasGroup.alpha = 1f;
-        leaderBoard_CanvasGroup.interactable = true;
-        leaderBoard_CanvasGroup.blocksRaycasts = true;
+        animatedLeaderBoardPanel.ShowPanel();
 
         closeLeaderBoard_Button.interactable = false;
         nextPage_Button.interactable = false;
@@ -129,9 +128,7 @@ public class LeaderBoardDisplay : MonoBehaviour
     /// </summary>
     private void HideLeaderBoard()
     {
-        leaderBoard_CanvasGroup.alpha = 0f;
-        leaderBoard_CanvasGroup.interactable = false;
-        leaderBoard_CanvasGroup.blocksRaycasts = false;
+        animatedLeaderBoardPanel.HidePanel();
     }
 
     /// <summary>
@@ -230,9 +227,11 @@ public class LeaderBoardDisplay : MonoBehaviour
     {
         rowPool.ReturnAllObjects();
 
-        foreach (LeaderBoard_Data data in board)
+        for (int i = 0; i < board.Count; i++)
         {
-            rowPool.GetObject().SetDisplay(data);
+            LeaderBoardRow row = rowPool.GetObject();
+            row.SetDisplay(board[i]);
+            row.PlayEntrance(i * rowStaggerDelay);
         }
 
         ResetPageScroll();

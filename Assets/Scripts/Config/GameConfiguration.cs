@@ -43,4 +43,6 @@ public class GameConfiguration : ScriptableObject
     /// Sorulacak soru sayısı havuzdan fazlaysa bu değer sınırlanır.
     /// </summary>
     public int      questionCount       = 10;
+
+    public int      baseChoiceCount     = 4;
 }

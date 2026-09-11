@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbcbdb568460b4344ab9805b079c5186, type: 3}
+  m_Name: ChoiceAdderEffect
+  m_EditorClassIdentifier: Assembly-CSharp::ChoiceStealer_PassiveEffect
+  perkDescription: Soruya {0} tane secenek ekler.
+  perkPriority: 0
+  tokenValue: -8
+  effectWhiteList: []
+  effectBlackList:
+  - {fileID: 11400000, guid: 63d8082ca4fdf49cfa54d722e92592e0, type: 2}
+  minMultiplierLimit: 0
+  maxMultiplierLimit: 1
+  additionCount: 1
